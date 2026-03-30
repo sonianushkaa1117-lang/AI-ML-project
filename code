@@ -1,0 +1,51 @@
+import pandas as pd
+
+# Dataset
+data = {
+    'Book': [
+        'The Alchemist', 'Harry Potter', 'The Hobbit', 'Atomic Habits',
+        'Rich Dad Poor Dad', 'The Shining', 'Dracula', 'Dune',
+        'Foundation', 'Pride and Prejudice', 'Me Before You',
+        'Ikigai', 'Deep Work', '1984', 'To Kill a Mockingbird',
+        'The Silent Patient', 'Gone Girl', 'Sapiens',
+        'Educated', 'Steve Jobs'
+    ],
+    
+    'Genre': [
+        'Fiction', 'Fantasy', 'Fantasy', 'Self-help',
+        'Finance', 'Horror', 'Horror', 'Sci-Fi',
+        'Sci-Fi', 'Romance', 'Romance',
+        'Self-help', 'Self-help', 'Fiction', 'Fiction',
+        'Thriller', 'Thriller', 'History',
+        'Biography', 'Biography'
+    ],
+    
+    'Rating': [
+        4.7, 4.9, 4.8, 4.6,
+        4.5, 4.3, 4.2, 4.6,
+        4.4, 4.7, 4.5,
+        4.4, 4.5, 4.6, 4.8,
+        4.3, 4.4, 4.7,
+        4.6, 4.5
+    ]
+}
+df = pd.DataFrame(data)
+# Normalize genre column (for case-insensitive matching)
+df['Genre'] = df['Genre'].str.lower()
+# Recommendation function
+def recommend_books(genre, min_rating=4.0):
+    genre = genre.lower()
+    filtered = df[(df['Genre'] == genre) & (df['Rating'] >= min_rating)]
+    if filtered.empty:
+        print("\n No books found for this genre.")
+        print("Available genres:", df['Genre'].unique())
+        return   
+    filtered['Score'] = filtered['Rating'] * 1.0   
+    recommended = filtered.sort_values(by='Score', ascending=False)
+    print("\n Top Recommendations:\n")
+    for i, row in recommended.head(5).iterrows():
+        print(f"{row['Book']}  ({row['Rating']})")
+genre=('Fiction', 'Fantasy', 'Self-help','Finance', 'Horror', 'Sci-Fi', 'Romance', 'Thriller', 'History','Biography')
+print('available genre:',genre)
+genre_input = input("Enter genre: ")
+recommend_books(genre_input)
