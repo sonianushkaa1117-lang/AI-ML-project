@@ -1,83 +1,66 @@
-# AI-ML-project
-Book Recommendation System
- Overview
+# Movie Recommendation System using Neural Networks
 
-This project is a simple Book Recommendation System built using Python and Pandas. It recommends books to users based on their preferred genre and minimum rating.
+This project is a simple movie recommendation system built using a neural network. It takes basic movie features like genre, rating, votes, and year, and uses them to learn patterns and suggest movies accordingly.
 
-The system filters and displays the top-rated books from a predefined dataset, making it easier for users to discover relevant books.
+The focus of this project is not just recommendation, but understanding how a model learns from data over time.
 
-Features
-Recommends books based on genre
-Filters books by minimum rating
-Case-insensitive genre matching
-Displays top 5 recommendations
-Simple and fast command-line interface
-Technologies Used
-Python
-Pandas
-Dataset
+---
 
-The dataset is manually created and includes:
+## What this project does
 
-Book Name
-Genre
-Rating
+A small dataset of movies is created manually, containing information like title, genre, rating, number of votes, and release year. This data is then prepared and fed into a neural network.
 
-Example:
+The model is trained over 40 epochs. During training, it tries to reduce error and improve predictions. Once trained, it can suggest movies from a chosen genre based on learned patterns.
 
-Book	Genre	Rating
-The Alchemist	Fiction	4.7
-Harry Potter	Fantasy	4.9
-Atomic Habits	Self-help	4.6
-⚙️ How It Works
-The dataset is stored in a Pandas DataFrame
-Genres are converted to lowercase for consistency
-User inputs a genre
-The system:
-Filters books by genre
-Applies minimum rating filter
-Sorts books by rating
-Displays top 5 results
--How to Run the Project
-Step 1: Install Pandas
-pip install pandas
-Step 2: Run the Script
-python your_file_name.py
-Step 3: Enter Genre
+---
 
-Example:
+## How it works
 
-Enter genre: Fantasy
--Available Genres
-Fiction
-Fantasy
-Self-help
-Finance
-Horror
-Sci-Fi
-Romance
-Thriller
-History
-Biography
--Example Output
-Top Recommendations:
+The genre values are converted into numerical form so the model can understand them. Other features like rating, votes, and year are scaled to keep everything balanced.
 
-Harry Potter (4.9)
-The Hobbit (4.8)
--Limitations
-Small dataset
-No user personalization
-Command-line based (no GUI)
--Future Improvements
-Add larger dataset
-Use machine learning for better recommendations
-Build a web app interface
-Add filters like author, year, popularity
--Learning Outcomes
-Understanding Pandas DataFrame
-Data filtering and sorting
-Basic recommendation system logic
-Handling user input in Python
--Author
+A neural network is built using TensorFlow and trained using the Adam optimizer. The model learns to predict normalized ratings based on the given inputs.
 
-Anushka Soni
+After training, graphs are plotted to show how the model improved over time. Both loss and error are tracked so it’s easy to see how well the model is learning.
+
+---
+
+## Recommendation logic
+
+When a user enters a genre, the system filters movies from that category and runs them through the trained model. Each movie gets a score, and the top results are displayed as recommendations.
+
+The system also handles incorrect inputs by showing available genres.
+
+---
+
+## Technologies used
+
+Python is used for the entire implementation.  
+Pandas and NumPy are used for handling and processing data.  
+Matplotlib is used to visualize training performance.  
+TensorFlow and Keras are used to build and train the neural network.
+
+---
+
+## Running the project
+
+You can run this project directly in Google Colab or any Python environment.
+
+Once you run the code:
+- the model starts training
+- training graphs are displayed
+- you are prompted to enter a genre
+- the system returns recommended movies
+
+---
+
+## Output
+
+The model trains over 40 epochs and gradually reduces loss.  
+Graphs are generated to show training and validation performance.  
+Finally, a list of recommended movies is printed based on the selected genre.
+
+---
+
+## Final note
+
+This is a simple project meant to understand the basics of machine learning and recommendation systems. It keeps things straightforward while still showing how real models are built and used.
