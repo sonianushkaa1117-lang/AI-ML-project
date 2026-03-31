@@ -1,51 +1,157 @@
 import pandas as pd
-
-# Dataset
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import LabelEncoder, MinMaxScaler
+from sklearn.model_selection import train_test_split
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import layers
+ 
+print("All libraries loaded!")
+ 
 data = {
-    'Book': [
-        'The Alchemist', 'Harry Potter', 'The Hobbit', 'Atomic Habits',
-        'Rich Dad Poor Dad', 'The Shining', 'Dracula', 'Dune',
-        'Foundation', 'Pride and Prejudice', 'Me Before You',
-        'Ikigai', 'Deep Work', '1984', 'To Kill a Mockingbird',
-        'The Silent Patient', 'Gone Girl', 'Sapiens',
-        'Educated', 'Steve Jobs'
+    'Title': [
+        'The Dark Knight', 'Inception', 'Interstellar', 'The Matrix',
+        'Avengers: Endgame', 'Titanic', 'The Godfather', 'Pulp Fiction',
+        'The Shawshank Redemption', 'Forrest Gump', 'Parasite',
+        'Joker', '1917', 'Get Out', 'Mad Max: Fury Road',
+        'Black Panther', 'Coco', 'La La Land',
+        'The Revenant', 'Blade Runner 2049', 'Arrival',
+        'Hereditary', 'Midsommar', 'A Quiet Place',
+        'Knives Out', 'Everything Everywhere All at Once',
+        'The Grand Budapest Hotel', 'Moonlight',
+        'Spider-Man: Into the Spider-Verse', 'Soul'
     ],
-    
     'Genre': [
-        'Fiction', 'Fantasy', 'Fantasy', 'Self-help',
-        'Finance', 'Horror', 'Horror', 'Sci-Fi',
-        'Sci-Fi', 'Romance', 'Romance',
-        'Self-help', 'Self-help', 'Fiction', 'Fiction',
-        'Thriller', 'Thriller', 'History',
-        'Biography', 'Biography'
+        'Action', 'Sci-Fi', 'Sci-Fi', 'Sci-Fi',
+        'Action', 'Drama', 'Crime', 'Crime',
+        'Drama', 'Drama', 'Thriller',
+        'Drama', 'War', 'Horror', 'Action',
+        'Action', 'Animation', 'Romance',
+        'Adventure', 'Sci-Fi', 'Sci-Fi',
+        'Horror', 'Horror', 'Horror',
+        'Thriller', 'Sci-Fi',
+        'Comedy', 'Drama',
+        'Animation', 'Animation'
     ],
-    
     'Rating': [
-        4.7, 4.9, 4.8, 4.6,
-        4.5, 4.3, 4.2, 4.6,
-        4.4, 4.7, 4.5,
-        4.4, 4.5, 4.6, 4.8,
-        4.3, 4.4, 4.7,
-        4.6, 4.5
+        9.0, 8.8, 8.6, 8.7,
+        8.4, 7.9, 9.2, 8.9,
+        9.3, 8.8, 8.6,
+        8.4, 8.3, 7.7, 8.1,
+        7.3, 8.4, 8.0,
+        8.0, 8.0, 7.9,
+        7.3, 7.1, 7.5,
+        7.9, 8.0,
+        8.1, 7.4,
+        8.4, 8.1
+    ],
+    'Votes': [
+        2800000, 2300000, 1900000, 1900000,
+        1200000, 1100000, 1800000, 2100000,
+        2700000, 2000000, 750000,
+        1100000, 650000, 700000, 950000,
+        750000, 460000, 500000,
+        800000, 590000, 680000,
+        250000, 200000, 520000,
+        430000, 310000,
+        700000, 260000,
+        390000, 350000
+    ],
+    'Year': [
+        2008, 2010, 2014, 1999,
+        2019, 1997, 1972, 1994,
+        1994, 1994, 2019,
+        2019, 2019, 2017, 2015,
+        2018, 2017, 2016,
+        2015, 2017, 2016,
+        2018, 2019, 2018,
+        2019, 2022,
+        2014, 2016,
+        2018, 2020
     ]
 }
+ 
 df = pd.DataFrame(data)
-# Normalize genre column (for case-insensitive matching)
-df['Genre'] = df['Genre'].str.lower()
-# Recommendation function
-def recommend_books(genre, min_rating=4.0):
-    genre = genre.lower()
-    filtered = df[(df['Genre'] == genre) & (df['Rating'] >= min_rating)]
+print(f"Dataset loaded: {df.shape[0]} movies, {df['Genre'].nunique()} genres")
+print("Available genres:", sorted(df['Genre'].unique()))
+ 
+label_encoder = LabelEncoder()
+df['Genre_enc'] = label_encoder.fit_transform(df['Genre'])
+ 
+scaler = MinMaxScaler()
+df[['Rating_norm', 'Votes_norm', 'Year_norm']] = scaler.fit_transform(
+    df[['Rating', 'Votes', 'Year']]
+)
+ 
+X = df[['Genre_enc', 'Votes_norm', 'Year_norm']].values
+y = df['Rating_norm'].values
+ 
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+ 
+model = keras.Sequential([
+    layers.Dense(64, activation='relu', input_shape=(3,)),
+    layers.Dropout(0.2),
+    layers.Dense(32, activation='relu'),
+    layers.Dense(1)
+])
+ 
+model.compile(optimizer='adam', loss='mse', metrics=['mae'])
+model.summary()
+ 
+history = model.fit(
+    X_train, y_train,
+    epochs=40,
+    batch_size=8,
+    validation_data=(X_test, y_test),
+    verbose=1
+)
+ 
+fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+ 
+axes[0].plot(history.history['loss'], label='Train Loss', color='#378ADD', linewidth=2)
+axes[0].plot(history.history['val_loss'], label='Val Loss', color='#D85A30', linewidth=2, linestyle='--')
+axes[0].set_title('Loss over 40 Epochs', fontsize=14)
+axes[0].set_xlabel('Epoch')
+axes[0].set_ylabel('MSE Loss')
+axes[0].legend()
+axes[0].grid(alpha=0.3)
+ 
+axes[1].plot(history.history['mae'], label='Train MAE', color='#1D9E75', linewidth=2)
+axes[1].plot(history.history['val_mae'], label='Val MAE', color='#BA7517', linewidth=2, linestyle='--')
+axes[1].set_title('MAE over 40 Epochs', fontsize=14)
+axes[1].set_xlabel('Epoch')
+axes[1].set_ylabel('Mean Absolute Error')
+axes[1].legend()
+axes[1].grid(alpha=0.3)
+ 
+plt.tight_layout()
+plt.savefig('training_curves.png', dpi=150)
+plt.show()
+print("Plot saved as training_curves.png")
+ 
+def recommend_movies(genre, min_rating=7.5, top_n=5):
+    genre = genre.strip().title()
+    available = df['Genre'].unique().tolist()
+    if genre not in available:
+        print(f"Genre '{genre}' not found.\nAvailable: {sorted(available)}")
+        return
+ 
+    filtered = df[(df['Genre'] == genre) & (df['Rating'] >= min_rating)].copy()
     if filtered.empty:
-        print("\n No books found for this genre.")
-        print("Available genres:", df['Genre'].unique())
-        return   
-    filtered['Score'] = filtered['Rating'] * 1.0   
-    recommended = filtered.sort_values(by='Score', ascending=False)
-    print("\n Top Recommendations:\n")
-    for i, row in recommended.head(5).iterrows():
-        print(f"{row['Book']}  ({row['Rating']})")
-genre=('Fiction', 'Fantasy', 'Self-help','Finance', 'Horror', 'Sci-Fi', 'Romance', 'Thriller', 'History','Biography')
-print('available genre:',genre)
-genre_input = input("Enter genre: ")
-recommend_books(genre_input)
+        print(f"No {genre} movies with rating >= {min_rating}")
+        return
+ 
+    X_input = scaler.transform(filtered[['Rating', 'Votes', 'Year']])
+    genre_enc = label_encoder.transform(filtered['Genre']).reshape(-1, 1)
+    X_pred = np.hstack([genre_enc, X_input[:, 1:]])
+    filtered['Model_Score'] = model.predict(X_pred, verbose=0).flatten()
+ 
+    result = filtered.sort_values('Model_Score', ascending=False).head(top_n)
+    print(f"\nTop {top_n} {genre} Recommendations:\n")
+    for _, row in result.iterrows():
+        print(f"  {row['Title']:<45} Rating: {row['Rating']}  ({int(row['Year'])})")
+ 
+print("\nAvailable genres:", sorted(df['Genre'].unique()))
+genre_input = input("\nEnter a genre: ")
+recommend_movies(genre_input)
